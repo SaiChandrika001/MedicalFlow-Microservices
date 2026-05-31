@@ -9,4 +9,5 @@ public interface UserService {
     AuthResponse authenticate(LoginRequest loginRequest);
     User register(RegisterRequest registerRequest);
     User findByEmail(String email);
+    User findById(Long id);
 }
