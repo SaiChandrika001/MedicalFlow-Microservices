@@ -6,9 +6,15 @@ import com.medicalflow.appointmentservice.dto.AppointmentResponse;
 import com.medicalflow.appointmentservice.dto.AppointmentStatusUpdateRequest;
 import com.medicalflow.appointmentservice.entity.Appointment;
 import com.medicalflow.appointmentservice.entity.AppointmentStatus;
+import com.medicalflow.appointmentservice.dto.UserProfileResponse;
 import com.medicalflow.appointmentservice.exception.InvalidAppointmentException;
 import com.medicalflow.appointmentservice.exception.ResourceNotFoundException;
+import com.medicalflow.appointmentservice.exception.UserServiceClientException;
 import com.medicalflow.appointmentservice.repository.AppointmentRepository;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -19,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +44,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         // Verify user exists
         try {
-            userServiceClient.getUserById(userId);
+            getUserProfile(userId);
         } catch (Exception e) {
             log.error("User not found: {}", userId, e);
             throw new ResourceNotFoundException("User not found with id: " + userId);
@@ -216,6 +224,32 @@ public class AppointmentServiceImpl implements AppointmentService {
     public boolean checkDoctorAvailability(Long doctorId, LocalDateTime appointmentDate) {
         return !appointmentRepository.existsByDoctorIdAndAppointmentDateAndStatus(
                 doctorId, appointmentDate, AppointmentStatus.CONFIRMED);
+    }
+
+    @CircuitBreaker(name = "userService", fallbackMethod = "getUserProfileFallback")
+    @Retry(name = "userService")
+    @TimeLimiter(name = "userService")
+    @Bulkhead(name = "userService", type = Bulkhead.Type.SEMAPHORE)
+    public CompletableFuture<UserProfileResponse> getUserProfileAsync(Long userId) {
+        return CompletableFuture.supplyAsync(() -> userServiceClient.getUserById(userId));
+    }
+
+    public UserProfileResponse getUserProfileFallback(Long userId, Throwable throwable) {
+        String message = "User service fallback activated for userId=" + userId;
+        log.error(message, throwable);
+        throw new UserServiceClientException(message, throwable);
+    }
+
+    private UserProfileResponse getUserProfile(Long userId) {
+        try {
+            return getUserProfileAsync(userId).join();
+        } catch (CompletionException ex) {
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+            if (cause instanceof UserServiceClientException) {
+                throw (UserServiceClientException) cause;
+            }
+            throw new ResourceNotFoundException("User service unavailable for id: " + userId);
+        }
     }
 
     private AppointmentResponse mapToResponse(Appointment appointment) {

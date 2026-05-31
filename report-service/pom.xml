@@ -23,6 +23,10 @@
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <springdoc-openapi.version>2.0.2</springdoc-openapi.version>
+        <flyway.url>jdbc:mysql://localhost:3306/medicalflow_reports?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true</flyway.url>
+        <flyway.user>root</flyway.user>
+        <flyway.password>root</flyway.password>
+        <flyway.locations>filesystem:src/main/resources/db/migration</flyway.locations>
     </properties>
 
     <dependencyManagement>
@@ -95,6 +99,32 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- OpenTelemetry / Micrometer Tracing -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-otel</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-otlp</artifactId>
+            <version>1.24.0</version>
+        </dependency>
+        <!-- Actuator + Prometheus -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+
+        <!-- Flyway Database Migrations -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
@@ -129,3 +159,16 @@
     </build>
 
 </project>
+
+
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>9.23.1</version>
+                <configuration>
+                    <url>${flyway.url}</url>
+                    <user>${flyway.user}</user>
+                    <password>${flyway.password}</password>
+                    <locations>${flyway.locations}</locations>
+                </configuration>
+            </plugin>
