@@ -1,0 +1,52 @@
+# Ignore environment files with secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.jks
+*.keystore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build
+target/
+build/
+.gradle/
+out/
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Dependencies
+node_modules/
+vendor/
+
+# Test reports
+test-results/
+coverage/
+*.lcov
+
+# Logs
+logs/
+*.log
+
+# Database
+*.sql.bak
+*.sql.old
+
+# Docker
+.docker/
+
+# Temporary files
+tmp/
+temp/
+*.tmp

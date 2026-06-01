@@ -1,3 +1,80 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: 2533
+      MYSQL_DATABASE: medicalflow_users
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:8.1.2
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:8.1.2
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - user-service
+      - appointment-service
+      - report-service
+      - redis
+
+  user-service:
+    build: ./user-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/medicalflow_users?useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 2533
+    depends_on:
+      - mysql
+
+  appointment-service:
+    build: ./appointment-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - user-service
+
+  report-service:
+    build: ./report-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      - user-service
+
+  notification-service:
+    build: ./notification-service
+    ports:
+      - "8090:8090"
+
+volumes:
+  mysql-data:
 version: "3.8"
 
 services:
@@ -33,11 +110,14 @@ services:
       SPRING_FLYWAY_LOCATIONS: classpath:db/migration
       SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
       SPRING_FLYWAY_CLEAN_DISABLED: "true"
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
       OTEL_RESOURCE_ATTRIBUTES: service.name=user-service
     depends_on:
       mysql:
         condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
     ports:
       - "8081:8081"
 
@@ -56,6 +136,9 @@ services:
       SPRING_FLYWAY_LOCATIONS: classpath:db/migration
       SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
       SPRING_FLYWAY_CLEAN_DISABLED: "true"
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
       OTEL_RESOURCE_ATTRIBUTES: service.name=appointment-service
     depends_on:
@@ -63,6 +146,8 @@ services:
         condition: service_healthy
       user-service:
         condition: service_started
+      kafka-init:
+        condition: service_completed_successfully
     ports:
       - "8082:8082"
 
@@ -84,11 +169,14 @@ services:
       AWS_ACCESS_KEY_ID: ""
       AWS_SECRET_ACCESS_KEY: ""
       AWS_REGION: us-east-1
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
       OTEL_RESOURCE_ATTRIBUTES: service.name=report-service
     depends_on:
       mysql:
         condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
     ports:
       - "8084:8084"
 
@@ -97,6 +185,8 @@ services:
       context: ./api-gateway
       dockerfile: Dockerfile
     container_name: medicalflow-api-gateway
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
       user-service:
         condition: service_started
@@ -104,8 +194,31 @@ services:
         condition: service_started
       report-service:
         condition: service_started
+      kafka-init:
+        condition: service_completed_successfully
     ports:
       - "8080:8080"
+
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: medicalflow-notification-service
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_CONSUMER_GROUP_ID: notification-service
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME:-noreply@medicalflow.com}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED: "true"
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    ports:
+      - "8085:8085"
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.78.0

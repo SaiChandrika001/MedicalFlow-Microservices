@@ -27,11 +27,11 @@
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <springdoc-openapi.version>2.0.2</springdoc-openapi.version>
-        <lombok.version>1.18.40</lombok.version>
-        <flyway.url>jdbc:mysql://localhost:3306/medicalflow_appointments?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true</flyway.url>
-        <flyway.user>root</flyway.user>
-        <flyway.password>root</flyway.password>
-        <flyway.locations>filesystem:src/main/resources/db/migration</flyway.locations>
+        <lombok.version>1.18.46</lombok.version>
+        <flyway.version>10.15.2</flyway.version>
+        <db.url>jdbc:mysql://localhost:3306/medicalflow_appointments?useSSL=false&amp;serverTimezone=UTC</db.url>
+        <db.username>root</db.username>
+        <db.password>2533</db.password>
     </properties>
 
     <!-- Dependencies -->
@@ -59,7 +59,6 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
-            <version>4.0.4</version>
         </dependency>
 
         <!-- Resilience4j Circuit Breaker and Retry -->
@@ -72,7 +71,6 @@
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
-            <version>8.0.33</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -86,7 +84,6 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -109,10 +106,14 @@
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-tracing-bridge-otel</artifactId>
         </dependency>
+        <!-- Redis for caching -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-exporter-otlp</artifactId>
-            <version>1.24.0</version>
         </dependency>
         <!-- Actuator + Prometheus -->
         <dependency>
@@ -131,9 +132,20 @@
         </dependency>
 
         <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
             <version>7.4</version>
+        </dependency>
+
+        <!-- Spring Kafka for event publishing -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
         </dependency>
 
         <!-- Spring Security Test -->
@@ -173,7 +185,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
+                            <version>1.18.46</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
@@ -183,7 +195,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>3.1.6</version>
                 <configuration>
                     <excludes>
                         <exclude>
@@ -197,12 +208,28 @@
             <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
-                <version>9.23.1</version>
                 <configuration>
-                    <url>${flyway.url}</url>
-                    <user>${flyway.user}</user>
-                    <password>${flyway.password}</password>
-                    <locations>${flyway.locations}</locations>
+                    <url>${db.url}</url>
+                    <user>${db.username}</user>
+                    <password>${db.password}</password>
+                    <locations>filesystem:src/main/resources/db/migration</locations>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.mysql</groupId>
+                        <artifactId>mysql-connector-j</artifactId>
+                        <version>8.0.33</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <!-- Surefire Plugin for Tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <skip>false</skip>
                 </configuration>
             </plugin>
 

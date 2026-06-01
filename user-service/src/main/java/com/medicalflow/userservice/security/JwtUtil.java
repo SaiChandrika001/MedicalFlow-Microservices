@@ -43,6 +43,21 @@ public class JwtUtil {
                 .compact();
     }
 
+    public String generateTokenFromUser(com.medicalflow.userservice.entity.User user) {
+        String username = user.getEmail();
+        String authorities = "ROLE_" + user.getRole().name();
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
+
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("roles", authorities)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(jwtSecretKey, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
     public String getUsernameFromToken(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(jwtSecretKey)

@@ -13,6 +13,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.medicalflow.appointmentservice.security.JwtAuthenticationFilter;
+import com.medicalflow.appointmentservice.security.JwtUtil;
+
 import java.util.Arrays;
 
 @Configuration
@@ -26,16 +29,23 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtUtil jwtUtil) {
+        return new JwtAuthenticationFilter(jwtUtil);
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http.csrf().disable()
                 .cors()
                 .and()
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers("/api/appointments/**").authenticated()
-                        .anyRequest().authenticated())
+                .requestMatchers("/api/appointments/**").authenticated()
+                .anyRequest().authenticated())
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        // register JWT filter before spring security username/password filter
+        http.addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

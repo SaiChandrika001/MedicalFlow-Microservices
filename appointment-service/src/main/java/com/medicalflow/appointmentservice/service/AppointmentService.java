@@ -20,11 +20,16 @@ public interface AppointmentService {
 
     Page<AppointmentResponse> getDoctorAppointments(Long doctorId, Pageable pageable);
 
+    // Cached variants (use @Cacheable)
+    Page<AppointmentResponse> getDoctorAppointmentsCached(Long doctorId, Pageable pageable);
+
     Page<AppointmentResponse> getUserAppointmentsByStatus(Long userId, AppointmentStatus status, Pageable pageable);
 
     List<AppointmentResponse> getAppointmentsBetween(LocalDateTime startDate, LocalDateTime endDate);
 
     List<AppointmentResponse> getDoctorAppointmentsBetween(Long doctorId, LocalDateTime startDate, LocalDateTime endDate);
+
+    AppointmentResponse getAppointmentByIdCached(Long appointmentId, Long userId);
 
     AppointmentResponse updateAppointment(Long appointmentId, Long userId, AppointmentRequest request);
 

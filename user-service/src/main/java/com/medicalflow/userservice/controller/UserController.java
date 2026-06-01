@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/users")
@@ -22,6 +23,7 @@ public class UserController {
     }
 
     @GetMapping("/profile")
+    @PreAuthorize("hasAnyRole('PATIENT','DOCTOR','ADMIN')")
     public ResponseEntity<UserProfileResponse> getProfile(Authentication authentication) {
         String email = authentication.getName();
         User user = userService.findByEmail(email);
@@ -29,12 +31,14 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserProfileResponse> getUserById(@PathVariable Long id) {
         User user = userService.findById(id);
         return ResponseEntity.ok(mapToResponse(user));
     }
 
     @GetMapping("/by-email")
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
     public ResponseEntity<UserProfileResponse> getUserByEmail(@RequestParam String email) {
         User user = userService.findByEmail(email);
         return ResponseEntity.ok(mapToResponse(user));

@@ -10,4 +10,5 @@ public interface UserService {
     User register(RegisterRequest registerRequest);
     User findByEmail(String email);
     User findById(Long id);
+    String generateTokenForUser(User user);
 }

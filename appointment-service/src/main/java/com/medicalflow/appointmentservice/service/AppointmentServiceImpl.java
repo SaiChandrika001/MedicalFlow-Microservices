@@ -7,9 +7,12 @@ import com.medicalflow.appointmentservice.dto.AppointmentStatusUpdateRequest;
 import com.medicalflow.appointmentservice.entity.Appointment;
 import com.medicalflow.appointmentservice.entity.AppointmentStatus;
 import com.medicalflow.appointmentservice.dto.UserProfileResponse;
+import com.medicalflow.appointmentservice.event.AppointmentBookedEvent;
+import com.medicalflow.appointmentservice.event.AppointmentCancelledEvent;
 import com.medicalflow.appointmentservice.exception.InvalidAppointmentException;
 import com.medicalflow.appointmentservice.exception.ResourceNotFoundException;
 import com.medicalflow.appointmentservice.exception.UserServiceClientException;
+import com.medicalflow.appointmentservice.kafka.AppointmentEventProducer;
 import com.medicalflow.appointmentservice.repository.AppointmentRepository;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -37,6 +40,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
     private final UserServiceClient userServiceClient;
+    private final AppointmentEventProducer appointmentEventProducer;
 
     @Override
     public AppointmentResponse createAppointment(Long userId, AppointmentRequest request) {
@@ -73,6 +77,18 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         Appointment saved = appointmentRepository.save(appointment);
         log.info("Appointment created with id: {}", saved.getId());
+        
+        // Publish appointment booked event
+        AppointmentBookedEvent event = new AppointmentBookedEvent(
+            saved.getId(),
+            userId,
+            request.getDoctorId(),
+            request.getAppointmentDate(),
+            request.getReason(),
+            Instant.now()
+        );
+        appointmentEventProducer.publishAppointmentBooked(event);
+        
         return mapToResponse(saved);
     }
 
@@ -89,6 +105,12 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    @org.springframework.cache.annotation.Cacheable(value = "appointments", key = "#appointmentId")
+    public AppointmentResponse getAppointmentByIdCached(Long appointmentId, Long userId) {
+        return getAppointmentById(appointmentId, userId);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public Page<AppointmentResponse> getUserAppointments(Long userId, Pageable pageable) {
         log.info("Fetching appointments for user: {}", userId);
@@ -102,6 +124,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         log.info("Fetching appointments for doctor: {}", doctorId);
         return appointmentRepository.findByDoctorId(doctorId, pageable)
                 .map(this::mapToResponse);
+    }
+
+    @Override
+    @org.springframework.cache.annotation.Cacheable(value = "doctors", key = "#doctorId")
+    public Page<AppointmentResponse> getDoctorAppointmentsCached(Long doctorId, Pageable pageable) {
+        return getDoctorAppointments(doctorId, pageable);
     }
 
     @Override
@@ -200,6 +228,15 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setNotes(reason != null ? reason : appointment.getNotes());
         appointmentRepository.save(appointment);
         log.info("Appointment cancelled: {}", appointmentId);
+        
+        // Publish appointment cancelled event
+        AppointmentCancelledEvent event = new AppointmentCancelledEvent(
+            appointmentId,
+            userId,
+            reason != null ? reason : "No reason provided",
+            Instant.now()
+        );
+        appointmentEventProducer.publishAppointmentCancelled(event);
     }
 
     @Override

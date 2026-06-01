@@ -5,7 +5,9 @@ import com.medicalflow.userservice.dto.LoginRequest;
 import com.medicalflow.userservice.dto.RegisterRequest;
 import com.medicalflow.userservice.entity.Role;
 import com.medicalflow.userservice.entity.User;
+import com.medicalflow.userservice.event.UserRegisteredEvent;
 import com.medicalflow.userservice.exception.UserNotFoundException;
+import com.medicalflow.userservice.kafka.UserEventProducer;
 import com.medicalflow.userservice.repository.UserRepository;
 import com.medicalflow.userservice.security.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,6 +17,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.Instant;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -23,15 +26,21 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService;
+    private final UserEventProducer userEventProducer;
 
     public UserServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
                            AuthenticationManager authenticationManager,
-                           JwtUtil jwtUtil) {
+                           JwtUtil jwtUtil,
+                           RefreshTokenService refreshTokenService,
+                           UserEventProducer userEventProducer) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.refreshTokenService = refreshTokenService;
+        this.userEventProducer = userEventProducer;
     }
 
     @Override
@@ -42,10 +51,18 @@ public class UserServiceImpl implements UserService {
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
             );
             String token = jwtUtil.generateToken(authentication);
-            return new AuthResponse(token);
+            // create refresh token
+            com.medicalflow.userservice.entity.User user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow();
+            com.medicalflow.userservice.entity.RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+            return new AuthResponse(token, refreshToken.getToken());
         } catch (AuthenticationException ex) {
             throw new RuntimeException("Invalid email or password");
         }
+    }
+
+    @Override
+    public String generateTokenForUser(User user) {
+        return jwtUtil.generateTokenFromUser(user);
     }
 
     @Override
@@ -65,7 +82,18 @@ public class UserServiceImpl implements UserService {
         user.setFullName(registerRequest.getFullName());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setRole(role);
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        
+        // Publish user registered event
+        UserRegisteredEvent event = new UserRegisteredEvent(
+            savedUser.getEmail(),
+            savedUser.getFullName(),
+            savedUser.getRole().name(),
+            Instant.now()
+        );
+        userEventProducer.publishUserRegistered(event);
+        
+        return savedUser;
     }
 
     @Override

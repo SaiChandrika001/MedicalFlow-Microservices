@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import com.medicalflow.appointmentservice.audit.Audit;
 
 @RestController
 @RequestMapping("/appointments")
@@ -53,6 +54,7 @@ public class AppointmentController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
     })
+    @Audit(action = "Create Appointment")
     public ResponseEntity<ApiResponse<AppointmentResponse>> createAppointment(
             @Valid @RequestBody AppointmentRequest request) {
         log.info("Creating appointment");
@@ -142,12 +144,14 @@ public class AppointmentController {
     @PostMapping("/{id}/cancel")
     @PreAuthorize("hasAnyRole('PATIENT', 'ADMIN')")
     @Operation(summary = "Cancel appointment", description = "Cancels an existing appointment")
+    @Audit(action = "Cancel Appointment")
     public ResponseEntity<ApiResponse<Void>> cancelAppointment(
             @PathVariable Long id,
             @RequestParam(required = false) String reason) {
         log.info("Cancelling appointment: {}", id);
         Long userId = getCurrentUserId();
         appointmentService.cancelAppointment(id, userId, reason);
+        // audit is applied to controller via annotation
         return ResponseEntity.ok(new ApiResponse<>(true, "Appointment cancelled successfully", null));
     }
 

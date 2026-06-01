@@ -2,7 +2,9 @@ package com.medicalflow.reportservice.service;
 
 import com.medicalflow.reportservice.dto.ReportResponse;
 import com.medicalflow.reportservice.entity.Report;
+import com.medicalflow.reportservice.event.ReportUploadedEvent;
 import com.medicalflow.reportservice.exception.ResourceNotFoundException;
+import com.medicalflow.reportservice.kafka.ReportEventProducer;
 import com.medicalflow.reportservice.repository.ReportRepository;
 import com.medicalflow.reportservice.storage.S3Service;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class ReportServiceImpl implements ReportService {
 
     private final ReportRepository reportRepository;
     private final S3Service s3Service;
+    private final ReportEventProducer reportEventProducer;
 
     @Override
     public ReportResponse uploadReport(Long patientId, String reportName, String reportType, MultipartFile file) {
@@ -44,6 +47,17 @@ public class ReportServiceImpl implements ReportService {
                 .build();
 
         report = reportRepository.save(report);
+        
+        // Publish report uploaded event
+        ReportUploadedEvent event = new ReportUploadedEvent(
+            report.getReportId(),
+            patientId,
+            reportName,
+            reportType,
+            Instant.now()
+        );
+        reportEventProducer.publishReportUploaded(event);
+        
         return mapToResponse(report);
     }
 
