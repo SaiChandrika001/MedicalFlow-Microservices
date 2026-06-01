@@ -1,19 +1,24 @@
 package com.medicalflow.userservice.service;
 
+
+import com.medicalflow.userservice.entity.RefreshToken;
 import com.medicalflow.userservice.dto.AuthResponse;
 import com.medicalflow.userservice.dto.LoginRequest;
 import com.medicalflow.userservice.dto.RegisterRequest;
 import com.medicalflow.userservice.entity.Role;
 import com.medicalflow.userservice.entity.User;
 import com.medicalflow.userservice.exception.UserNotFoundException;
+import com.medicalflow.userservice.kafka.UserEventProducer;
 import com.medicalflow.userservice.repository.UserRepository;
 import com.medicalflow.userservice.security.JwtUtil;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -40,30 +45,67 @@ class UserServiceImplTest {
     @Mock
     private AuthenticationManager authenticationManager;
 
-    private JwtUtil jwtUtil = new JwtUtil("01234567890123456789012345678901", 3600000);
+    @Mock
+    private RefreshTokenService refreshTokenService;
+
+    @Mock
+    private UserEventProducer userEventProducer;
+
+    private final JwtUtil jwtUtil =
+            new JwtUtil("01234567890123456789012345678901", 3600000);
 
     private UserServiceImpl userService;
 
     @BeforeEach
     void setUp() {
-        userService = new UserServiceImpl(userRepository, passwordEncoder, authenticationManager, jwtUtil);
+        userService = new UserServiceImpl(
+                userRepository,
+                passwordEncoder,
+                authenticationManager,
+                jwtUtil,
+                refreshTokenService,
+                userEventProducer
+        );
     }
 
-    @Test
-    void authenticateReturnsAuthTokenWhenCredentialsAreValid() {
-        LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setEmail("user@example.com");
-        loginRequest.setPassword("password123");
 
-        Authentication authentication = new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
-        doReturn(authentication).when(authenticationManager).authenticate(any(Authentication.class));
+  @Test
+void authenticateReturnsAuthTokenWhenCredentialsAreValid() {
 
-        AuthResponse response = userService.authenticate(loginRequest);
+    LoginRequest loginRequest = new LoginRequest();
+    loginRequest.setEmail("user@example.com");
+    loginRequest.setPassword("password123");
 
-        assertThat(response).isNotNull();
-        assertThat(response.getAccessToken()).isNotBlank();
-        assertThat(response.getAccessToken()).contains(".");
-    }
+    User user = new User();
+    user.setId(1L);
+    user.setEmail("user@example.com");
+    user.setPassword("encoded-password");
+    user.setRole(Role.PATIENT);
+
+    when(userRepository.findByEmail("user@example.com"))
+            .thenReturn(Optional.of(user));
+
+    Authentication authentication =
+            new UsernamePasswordAuthenticationToken(
+                    loginRequest.getEmail(),
+                    loginRequest.getPassword());
+
+    doReturn(authentication)
+            .when(authenticationManager)
+            .authenticate(any(Authentication.class));
+
+    RefreshToken refreshToken = new RefreshToken();
+    refreshToken.setToken("refresh-token-123");
+
+    when(refreshTokenService.createRefreshToken(user))
+            .thenReturn(refreshToken);
+
+    AuthResponse response = userService.authenticate(loginRequest);
+
+    assertThat(response).isNotNull();
+    assertThat(response.getAccessToken()).isNotBlank();
+    assertThat(response.getRefreshToken()).isEqualTo("refresh-token-123");
+}
 
     @Test
     void authenticateThrowsWhenCredentialsAreInvalid() {
@@ -120,7 +162,9 @@ class UserServiceImplTest {
         User user = new User();
         user.setId(42L);
         user.setEmail("user@example.com");
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+
+        when(userRepository.findByEmail("user@example.com"))
+                .thenReturn(Optional.of(user));
 
         User result = userService.findByEmail("user@example.com");
 
@@ -129,18 +173,21 @@ class UserServiceImplTest {
 
     @Test
     void findByEmailThrowsWhenMissing() {
-        when(userRepository.findByEmail("missing@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("missing@example.com"))
+                .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.findByEmail("missing@example.com"))
                 .isInstanceOf(UserNotFoundException.class)
-                .hasMessageContaining("User not found with email: missing@example.com");
+                .hasMessageContaining("User not found with email");
     }
 
     @Test
     void findByIdReturnsUserWhenPresent() {
         User user = new User();
         user.setId(99L);
-        when(userRepository.findById(99L)).thenReturn(Optional.of(user));
+
+        when(userRepository.findById(99L))
+                .thenReturn(Optional.of(user));
 
         User result = userService.findById(99L);
 
@@ -149,10 +196,11 @@ class UserServiceImplTest {
 
     @Test
     void findByIdThrowsWhenMissing() {
-        when(userRepository.findById(123L)).thenReturn(Optional.empty());
+        when(userRepository.findById(123L))
+                .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.findById(123L))
                 .isInstanceOf(UserNotFoundException.class)
-                .hasMessageContaining("User not found with id: 123");
+                .hasMessageContaining("User not found with id");
     }
 }
