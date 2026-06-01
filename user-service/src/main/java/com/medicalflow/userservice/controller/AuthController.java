@@ -14,8 +14,6 @@ import com.medicalflow.userservice.service.UserService;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 import com.medicalflow.userservice.entity.RefreshToken;
 import com.medicalflow.userservice.service.RefreshTokenService;
@@ -46,33 +44,42 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refreshToken(@RequestBody String refreshToken) {
-        // body contains raw token string
+    public ResponseEntity<?> refreshToken(@RequestBody String refreshToken) {
+
         String token = refreshToken.trim();
+
         return refreshTokenService.findByToken(token)
                 .map(rt -> {
                     if (rt.isRevoked() || rt.getExpiryDate().isBefore(java.time.Instant.now())) {
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
                     }
-                    com.medicalflow.userservice.entity.User user = rt.getUser();
+
+                    User user = rt.getUser();
                     String accessToken = userService.generateTokenForUser(user);
-                    // rotate refresh token
+
                     refreshTokenService.invalidateUserTokens(user);
                     RefreshToken newRt = refreshTokenService.createRefreshToken(user);
-                    AuthResponse resp = new AuthResponse(accessToken, newRt.getToken());
-                    return ResponseEntity.ok(resp);
+
+                    AuthResponse response =
+                            new AuthResponse(accessToken, newRt.getToken());
+
+                    return ResponseEntity.ok(response);
                 })
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+                .orElseGet(() ->
+                        ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestBody String refreshToken) {
+    public ResponseEntity<?> logout(@RequestBody String refreshToken) {
+
         String token = refreshToken.trim();
+
         return refreshTokenService.findByToken(token)
                 .map(rt -> {
                     refreshTokenService.invalidateUserTokens(rt.getUser());
                     return ResponseEntity.noContent().build();
                 })
-                .orElseGet(() -> ResponseEntity.noContent().build());
+                .orElseGet(() ->
+                        ResponseEntity.noContent().build());
     }
 }

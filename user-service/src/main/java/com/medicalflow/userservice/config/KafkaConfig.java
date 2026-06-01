@@ -8,6 +8,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.core.KafkaAdmin;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Configuration
 @EnableKafka
 public class KafkaConfig {
@@ -17,39 +20,31 @@ public class KafkaConfig {
 
     @Bean
     public KafkaAdmin admin() {
-        return new KafkaAdmin(new org.springframework.kafka.core.KafkaAdmin.AdminClientFactory() {
-            @Override
-            public org.apache.kafka.clients.admin.AdminClient createAdmin(java.util.Map<String, Object> configs) {
-                return org.apache.kafka.clients.admin.AdminClient.create(configs);
-            }
-        }.apply(java.util.Map.of(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers)));
+        Map<String, Object> configs = new HashMap<>();
+        configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        return new KafkaAdmin(configs);
     }
 
     @Bean
     public NewTopic userRegisteredTopic() {
-        return new NewTopic("user-registered", 3, (short) 1)
-                .configs(java.util.Map.of("retention.ms", "86400000")); // 1 day
+        return new NewTopic("user-registered", 3, (short) 1);
     }
 
     @Bean
     public NewTopic appointmentBookedTopic() {
-        return new NewTopic("appointment-booked", 3, (short) 1)
-                .configs(java.util.Map.of("retention.ms", "604800000")); // 7 days
+        return new NewTopic("appointment-booked", 3, (short) 1);
     }
 
     @Bean
     public NewTopic appointmentCancelledTopic() {
-        return new NewTopic("appointment-cancelled", 3, (short) 1)
-                .configs(java.util.Map.of("retention.ms", "604800000")); // 7 days
+        return new NewTopic("appointment-cancelled", 3, (short) 1);
     }
 
     @Bean
     public NewTopic reportUploadedTopic() {
-        return new NewTopic("report-uploaded", 3, (short) 1)
-                .configs(java.util.Map.of("retention.ms", "2592000000")); // 30 days
+        return new NewTopic("report-uploaded", 3, (short) 1);
     }
 
-    // Dead letter topics for retry handling
     @Bean
     public NewTopic userRegisteredDltTopic() {
         return new NewTopic("user-registered.DLT", 1, (short) 1);
