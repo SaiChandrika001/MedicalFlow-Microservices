@@ -1,5 +1,5 @@
 package com.medicalflow.apigateway.config;
-
+import org.springframework.stereotype.Component;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
