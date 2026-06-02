@@ -1,0 +1,148 @@
+<mxfile host="app.diagrams.net" modified="2026-06-02T00:00:00.000Z" agent="Codex" version="24.7.17" type="device">
+  <diagram id="medicalflow-enterprise-architecture" name="MedicalFlow Enterprise Architecture">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="MedicalFlow-Microservices Enterprise Architecture" style="text;html=1;strokeColor=none;fillColor=none;fontSize=28;fontStyle=1;fontColor=#0f172a;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="360" y="20" width="880" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="external-layer" value="External Access Layer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eff6ff;strokeColor=#2563eb;fontStyle=1;fontColor=#1e3a8a;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="260" height="170" as="geometry"/>
+        </mxCell>
+        <mxCell id="client" value="Client Applications&lt;br&gt;Web UI | Mobile | REST Client" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2563eb;fontColor=#0f172a;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="80" y="135" width="180" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="edge-layer" value="Edge, Security &amp; Traffic Management Layer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#475569;fontStyle=1;fontColor=#334155;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="350" y="80" width="520" height="210" as="geometry"/>
+        </mxCell>
+        <mxCell id="gateway" value="API Gateway :8080&lt;br&gt;Spring Cloud Gateway&lt;br&gt;Routing | Rate Limiting | CORS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dbeafe;strokeColor=#1d4ed8;fontColor=#0f172a;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="420" y="130" width="190" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="security" value="Security Controls&lt;br&gt;JWT Authentication&lt;br&gt;Refresh Tokens&lt;br&gt;RBAC&lt;br&gt;Gateway Security" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fee2e2;strokeColor=#dc2626;fontColor=#7f1d1d;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="650" y="120" width="170" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="redis" value="Redis&lt;br&gt;Rate Limiter | Cache" style="shape=cylinder3d;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff7ed;strokeColor=#ea580c;fontColor=#7c2d12;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="235" width="130" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="app-layer" value="Microservices Application Layer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;fontStyle=1;fontColor=#14532d;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="140" y="330" width="960" height="170" as="geometry"/>
+        </mxCell>
+        <mxCell id="user-service" value="User Service :8081&lt;br&gt;Auth | Users | Profiles&lt;br&gt;JWT + Refresh Tokens" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;fontColor=#052e16;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="190" y="390" width="180" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="appointment-service" value="Appointment Service :8082&lt;br&gt;Scheduling | Status Flow&lt;br&gt;Audit | Pagination" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;fontColor=#052e16;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="410" y="390" width="190" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="report-service" value="Report Service :8084&lt;br&gt;Reports | Upload | Download&lt;br&gt;Metadata | S3-ready" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;fontColor=#052e16;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="640" y="390" width="180" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="notification-service" value="Notification Service :8085&lt;br&gt;Kafka Consumers&lt;br&gt;Email Notifications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;fontColor=#052e16;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="860" y="390" width="190" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="data-layer" value="Database &amp; Migration Layer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#9333ea;fontStyle=1;fontColor=#581c87;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="140" y="530" width="700" height="170" as="geometry"/>
+        </mxCell>
+        <mxCell id="users-db" value="MySQL Users DB&lt;br&gt;medicalflow_users" style="shape=cylinder3d;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f3e8ff;strokeColor=#9333ea;fontColor=#581c87;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="190" y="595" width="150" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="appointments-db" value="MySQL Appointments DB&lt;br&gt;medicalflow_appointments" style="shape=cylinder3d;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f3e8ff;strokeColor=#9333ea;fontColor=#581c87;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="390" y="595" width="180" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="reports-db" value="MySQL Reports DB&lt;br&gt;medicalflow_reports" style="shape=cylinder3d;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f3e8ff;strokeColor=#9333ea;fontColor=#581c87;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="595" width="150" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="flyway" value="Flyway&lt;br&gt;Schema Versioning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#7c3aed;fontColor=#4c1d95;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="370" y="535" width="160" height="45" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="messaging-layer" value="Event Streaming Layer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff7ed;strokeColor=#f97316;fontStyle=1;fontColor=#7c2d12;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="880" y="530" width="480" height="220" as="geometry"/>
+        </mxCell>
+        <mxCell id="kafka" value="Apache Kafka" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fed7aa;strokeColor=#ea580c;fontColor=#7c2d12;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="575" width="150" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="topic-user" value="user-registered" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffedd5;strokeColor=#f97316;fontColor=#7c2d12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="920" y="655" width="130" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="topic-booked" value="appointment-booked" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffedd5;strokeColor=#f97316;fontColor=#7c2d12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1070" y="655" width="145" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="topic-cancelled" value="appointment-cancelled" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffedd5;strokeColor=#f97316;fontColor=#7c2d12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="920" y="700" width="150" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="topic-report" value="report-uploaded" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffedd5;strokeColor=#f97316;fontColor=#7c2d12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="700" width="125" height="35" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="observability-layer" value="Monitoring &amp; Observability Layer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfeff;strokeColor=#0891b2;fontStyle=1;fontColor=#164e63;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="140" y="780" width="880" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="actuator" value="Spring Boot Actuator&lt;br&gt;/actuator/prometheus" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cffafe;strokeColor=#0891b2;fontColor=#164e63;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="180" y="835" width="170" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="prometheus" value="Prometheus&lt;br&gt;Metrics" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cffafe;strokeColor=#0891b2;fontColor=#164e63;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="390" y="835" width="140" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="grafana" value="Grafana&lt;br&gt;Dashboards" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cffafe;strokeColor=#0891b2;fontColor=#164e63;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="570" y="835" width="130" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="otel" value="OpenTelemetry&lt;br&gt;Collector" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cffafe;strokeColor=#0891b2;fontColor=#164e63;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="740" y="835" width="135" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="jaeger" value="Jaeger&lt;br&gt;Tracing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cffafe;strokeColor=#0891b2;fontColor=#164e63;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="900" y="835" width="100" height="55" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="cicd-layer" value="CI/CD &amp; Quality Gates" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdf2f8;strokeColor=#db2777;fontStyle=1;fontColor=#831843;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="930" y="80" width="410" height="210" as="geometry"/>
+        </mxCell>
+        <mxCell id="github-actions" value="GitHub Actions&lt;br&gt;CI/CD Pipeline" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce7f3;strokeColor=#db2777;fontColor=#831843;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="970" y="130" width="150" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="quality-gates" value="Maven Build &amp; Test&lt;br&gt;Docker Build Validation&lt;br&gt;OWASP Dependency Check&lt;br&gt;PMD Code Quality" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce7f3;strokeColor=#db2777;fontColor=#831843;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="120" width="160" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="docker-compose" value="Docker Compose&lt;br&gt;Local Runtime" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;fontColor=#0c4a6e;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1060" y="235" width="150" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e-client-gw" value="HTTPS / REST /api/v1" style="endArrow=block;html=1;rounded=0;strokeColor=#2563eb;fontColor=#1e3a8a;fontSize=11;" edge="1" parent="1" source="client" target="gateway"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-gw-security" value="JWT / RBAC" style="endArrow=block;html=1;rounded=0;strokeColor=#dc2626;fontColor=#7f1d1d;fontSize=11;" edge="1" parent="1" source="gateway" target="security"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-gw-redis" value="rate limit" style="endArrow=block;html=1;rounded=0;strokeColor=#ea580c;fontColor=#7c2d12;fontSize=11;" edge="1" parent="1" source="gateway" target="redis"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-gw-user" value="REST" style="endArrow=block;html=1;rounded=0;strokeColor=#2563eb;fontColor=#1e3a8a;fontSize=11;" edge="1" parent="1" source="gateway" target="user-service"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-gw-appt" value="REST" style="endArrow=block;html=1;rounded=0;strokeColor=#2563eb;fontColor=#1e3a8a;fontSize=11;" edge="1" parent="1" source="gateway" target="appointment-service"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-gw-report" value="REST" style="endArrow=block;html=1;rounded=0;strokeColor=#2563eb;fontColor=#1e3a8a;fontSize=11;" edge="1" parent="1" source="gateway" target="report-service"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-user-db" value="JPA" style="endArrow=block;html=1;rounded=0;strokeColor=#9333ea;fontColor=#581c87;fontSize=11;" edge="1" parent="1" source="user-service" target="users-db"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-appt-db" value="JPA" style="endArrow=block;html=1;rounded=0;strokeColor=#9333ea;fontColor=#581c87;fontSize=11;" edge="1" parent="1" source="appointment-service" target="appointments-db"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-report-db" value="JPA" style="endArrow=block;html=1;rounded=0;strokeColor=#9333ea;fontColor=#581c87;fontSize=11;" edge="1" parent="1" source="report-service" target="reports-db"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-appt-user" value="Feign / REST" style="endArrow=block;html=1;rounded=0;strokeColor=#2563eb;fontColor=#1e3a8a;fontSize=11;" edge="1" parent="1" source="appointment-service" target="user-service"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-appt-redis" value="cache" style="endArrow=block;html=1;rounded=0;strokeColor=#ea580c;fontColor=#7c2d12;fontSize=11;" edge="1" parent="1" source="appointment-service" target="redis"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="e-user-kafka" value="publish" style="endArrow=block;html=1;rounded=0;strokeColor=#f97316;fontColor=#7c2d12;fontSize=11;" edge="1" parent="1" source="user-service" target="topic-user"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-appt-booked" value="publish" style="endArrow=block;html=1;rounded=0;strokeColor=#f97316;fontColor=#7c2d12;fontSize=11;" edge="1" parent="1" source="appointment-service" target="topic-booked"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-appt-cancelled" value="publish" style="endArrow=block;html=1;rounded=0;strokeColor=#f97316;fontColor=#7c2d12;fontSize=11;" edge="1" parent="1" source="appointment-service" target="topic-cancelled"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-report-topic" value="publish" style="endArrow=block;html=1;rounded=0;strokeColor=#f97316;fontColor=#7c2d12;fontSize=11;" edge="1" parent="1" source="report-service" target="topic-report"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-topic-kafka1" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#f97316;" edge="1" parent="1" source="topic-user" target="kafka"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-topic-kafka2" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#f97316;" edge="1" parent="1" source="topic-booked" target="kafka"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-topic-kafka3" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#f97316;" edge="1" parent="1" source="topic-cancelled" target="kafka"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-topic-kafka4" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#f97316;" edge="1" parent="1" source="topic-report" target="kafka"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-kafka-notify" value="consume" style="endArrow=block;html=1;rounded=0;strokeColor=#f97316;fontColor=#7c2d12;fontSize=11;" edge="1" parent="1" source="kafka" target="notification-service"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="e-act-prom" value="metrics" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#0891b2;fontColor=#164e63;fontSize=11;" edge="1" parent="1" source="actuator" target="prometheus"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-prom-grafana" value="dashboards" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#0891b2;fontColor=#164e63;fontSize=11;" edge="1" parent="1" source="prometheus" target="grafana"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-otel-jaeger" value="traces" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#0891b2;fontColor=#164e63;fontSize=11;" edge="1" parent="1" source="otel" target="jaeger"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-services-actuator" value="actuator" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#0891b2;fontColor=#164e63;fontSize=11;" edge="1" parent="1" source="appointment-service" target="actuator"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-services-otel" value="OTLP" style="endArrow=block;html=1;rounded=0;dashed=1;strokeColor=#0891b2;fontColor=#164e63;fontSize=11;" edge="1" parent="1" source="report-service" target="otel"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="e-gha-quality" value="quality gates" style="endArrow=block;html=1;rounded=0;strokeColor=#db2777;fontColor=#831843;fontSize=11;" edge="1" parent="1" source="github-actions" target="quality-gates"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-quality-compose" value="validated images" style="endArrow=block;html=1;rounded=0;strokeColor=#db2777;fontColor=#831843;fontSize=11;" edge="1" parent="1" source="quality-gates" target="docker-compose"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e-compose-app" value="orchestrates" style="endArrow=block;html=1;rounded=0;strokeColor=#0284c7;fontColor=#0c4a6e;fontSize=11;" edge="1" parent="1" source="docker-compose" target="gateway"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
