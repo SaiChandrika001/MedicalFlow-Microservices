@@ -1,5 +1,6 @@
 package com.medicalflow.reportservice.service;
 
+import com.medicalflow.reportservice.kafka.ReportEventProducer;
 import com.medicalflow.reportservice.entity.Report;
 import com.medicalflow.reportservice.repository.ReportRepository;
 import com.medicalflow.reportservice.service.ReportServiceImpl;
@@ -28,6 +29,9 @@ class ReportServiceImplTest {
 
     @Mock
     private S3Service s3Service;
+    
+    @Mock
+    private ReportEventProducer reportEventProducer;
 
     @InjectMocks
     private ReportServiceImpl reportService;

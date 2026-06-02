@@ -1,6 +1,5 @@
 package com.medicalflow.appointmentservice.service;
 
-import com.medicalflow.appointmentservice.kafka.AppointmentEventProducer;
 import com.medicalflow.appointmentservice.client.UserServiceClient;
 import com.medicalflow.appointmentservice.dto.AppointmentRequest;
 import com.medicalflow.appointmentservice.dto.AppointmentResponse;
@@ -19,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import com.medicalflow.appointmentservice.kafka.AppointmentEventProducer;
 
 import java.time.LocalDateTime;
 import java.util.List;
